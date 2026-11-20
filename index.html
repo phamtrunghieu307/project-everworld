@@ -1,0 +1,892 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EVERWORLD - Kingdom of Aurora</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Marcellus&display=swap');
+*{box-sizing:border-box}
+:root{--gold:#e8c98b;--dark:#101b15;--panel:#1b3022;--line:#526b4d;--text:#e9e7d8}
+body{margin:0;background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif}
+button,input{font:inherit}button{cursor:pointer}
+.hidden{display:none!important}
+#login{min-height:100vh;display:grid;place-items:center;padding:15px;background:radial-gradient(ellipse at 50% 35%,#a4ad77,#426b48 48%,#101c16 100%)}
+.auth{width:min(420px,96vw);padding:34px;background:#17291ff2;border:1px solid #b09a67;border-radius:18px;text-align:center;box-shadow:0 20px 80px #0008}
+.brand{font:40px Marcellus;color:var(--gold);letter-spacing:5px}
+.auth p{font-size:10px;color:#bdcbb8;letter-spacing:3px;margin:8px 0 25px}
+.auth input{width:100%;padding:13px;margin:7px 0;background:#0d1a13;color:white;border:1px solid #53694c;border-radius:8px;outline:none}
+.auth input:focus{border-color:var(--gold)}
+.gold{background:linear-gradient(135deg,#f5e3b5,#b58b4e);color:#1c281d;border:0;border-radius:8px;padding:12px;font-weight:800}
+.auth button{width:100%;margin-top:10px}
+.switch{background:none;border:0;color:var(--gold);font-size:12px}
+header{min-height:62px;background:#0b1510;border-bottom:1px solid #465b3e;display:flex;align-items:center;justify-content:space-between;gap:9px;padding:9px 14px;flex-wrap:wrap;position:relative;z-index:3}
+.logo{font:23px Marcellus;color:var(--gold);letter-spacing:3px}
+.resources{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.res{font-size:11px;padding:7px 8px;background:#1b3023;border:1px solid #405940;border-radius:8px;white-space:nowrap}
+.res b{color:#f1d59b}
+.tool{background:#11251e;color:#f1d59b;border:1px solid #806f4b;border-radius:7px;padding:8px 10px;font-size:11px}
+.tool:hover{background:#35533a}
+.layout{display:grid;grid-template-columns:180px minmax(0,1fr);min-height:calc(100vh - 62px)}
+aside{background:#12231a;border-right:1px solid #405940;padding:12px}
+.nav{display:block;width:100%;padding:12px;text-align:left;background:none;border:1px solid transparent;color:#c5d0c3;border-radius:8px;margin:3px 0;font-size:12px}
+.nav.active{background:#2b4834;border-color:#a18a56;color:#f2d99e}
+main{padding:15px;min-width:0}
+.eyebrow{font-size:10px;letter-spacing:2px;color:#a9bba9}
+h1{font:29px Marcellus;color:var(--gold);margin:4px 0}
+.sub{font-size:11px;color:#b7c4b3;line-height:1.6}
+.view{display:none}.view.active{display:block}
+.world{display:grid;grid-template-columns:minmax(0,1fr) 245px;gap:11px}
+.mapbox{height:min(77vh,850px);min-height:500px;position:relative;overflow:hidden;border:1px solid #87936b;border-radius:13px;background:#438b91;box-shadow:0 10px 30px #0004}
+canvas{width:100%;height:100%;display:block;touch-action:none}
+.mapname{position:absolute;top:12px;left:12px;background:#10231eea;padding:9px 12px;border:1px solid #a18a56;border-radius:8px;pointer-events:none}
+.mapname b{font:16px Marcellus;color:var(--gold)}
+.mapname small{display:block;color:#c1cbb8;font-size:10px}
+.mapcontrols{position:absolute;right:10px;top:10px;display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.maptools{position:absolute;left:10px;bottom:10px;display:flex;gap:5px;flex-wrap:wrap;max-width:95%}
+.maptools .tool{padding:8px}
+.maphelp{position:absolute;right:10px;bottom:12px;background:#10231eea;padding:8px;border-radius:6px;font-size:10px;pointer-events:none}
+.side{display:flex;flex-direction:column;gap:9px;min-width:0}
+.panel,.content{background:linear-gradient(145deg,#213a2b,#14271d);border:1px solid #496044;border-radius:10px;padding:12px;min-width:0}
+.panel h3{font:14px Marcellus;color:var(--gold);margin:0 0 8px}
+.stat{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid #354c38;font-size:11px;color:#bdc9bb}
+.stat b{color:#f0d69f}
+.bar{height:8px;background:#354c38;border-radius:10px;overflow:hidden;margin:7px 0}
+.bar div{height:100%;width:0;background:linear-gradient(90deg,#8ebc70,#e7c77c);transition:width .15s}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px}
+.tile{background:linear-gradient(145deg,#25432f,#15281d);border:1px solid #4d6949;border-radius:10px;padding:13px}
+.tile h3{font:16px Marcellus;color:var(--gold);margin:5px 0}
+.tile p{font-size:11px;color:#b7c4b3;line-height:1.5}
+.tile button{background:#314d35;border:1px solid #947d4e;color:#f2d99e;padding:8px 10px;border-radius:7px;margin:3px}
+.tag{display:inline-block;padding:3px 7px;border-radius:20px;background:#344d38;color:#d9e5ca;font-size:10px}
+.log{font-size:11px;color:#bdc9bb;line-height:1.6;min-height:35px}
+#buildQuick{position:absolute;right:10px;top:57px;width:min(285px,78vw);max-height:65%;overflow:auto;background:#14271df7;border:1px solid #9a8657;border-radius:10px;padding:10px;z-index:5;box-shadow:0 10px 30px #0009}
+.quickitem{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 3px;border-bottom:1px solid #40553d;font-size:11px}
+.quickitem button{background:#36573b;border:1px solid #9a8657;color:#f5d99c;border-radius:6px;padding:6px}
+#actionBox{position:absolute;left:50%;top:13px;transform:translateX(-50%);width:min(280px,65%);background:#10231eef;border:1px solid #d3b979;border-radius:9px;padding:9px;text-align:center;z-index:4;pointer-events:none}
+#actionTitle{font-size:11px;color:#f3d99d;font-weight:700}
+#actionTime{font-size:10px;color:#ddd;margin-top:4px}
+#actionBar{height:7px;background:#3d503c;border-radius:8px;margin-top:6px;overflow:hidden}
+#actionFill{height:100%;width:0;background:#e5c47e}
+#toast{position:fixed;bottom:18px;right:18px;background:#244532;border:1px solid var(--gold);padding:12px 16px;border-radius:9px;z-index:50;font-size:12px;max-width:90vw;box-shadow:0 5px 20px #0007}
+#shopModal,#chatModal{position:fixed;inset:0;background:#000a;z-index:20;display:grid;place-items:center;padding:14px}
+.modal{width:min(540px,96vw);max-height:85vh;overflow:auto;background:#172a1e;border:1px solid #a38a55;border-radius:14px;padding:17px;box-shadow:0 15px 60px #0009}
+.modal h2{font:23px Marcellus;color:var(--gold);margin:0 0 8px}
+.modalHead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.close{background:#3a4935;color:#fff;border:1px solid #8c825c;border-radius:7px;padding:7px 11px}
+.shopGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.shopItem{padding:11px;background:#213a2b;border:1px solid #52694a;border-radius:8px}
+.shopItem b{color:var(--gold);font-size:12px}
+.shopItem p{font-size:10px;color:#bdcbb8;margin:6px 0}
+.shopItem button{padding:7px 9px;margin:3px 3px 0 0;font-size:10px}
+#chatMessages{height:245px;overflow:auto;background:#0d1b13;border:1px solid #42583e;border-radius:8px;padding:10px;font-size:11px;line-height:1.6}
+.chatline{padding:4px 0;border-bottom:1px solid #ffffff0d;overflow-wrap:anywhere}
+.chatline b{color:#e5ca8e}
+.chatForm{display:flex;gap:6px;margin-top:8px}
+.chatForm input{flex:1;min-width:0;background:#0d1b13;border:1px solid #53674b;border-radius:7px;padding:10px;color:white}
+.mobile{display:none}
+@media(max-width:1050px){.world{grid-template-columns:1fr}.side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){
+ header{justify-content:center}.logo{width:100%;text-align:center}.layout{display:block}aside{display:none}
+ main{padding:8px}.mapbox{height:66vh;min-height:440px}.side{display:flex}
+ .maphelp{display:none}.maptools{max-width:98%}.maptools .tool{padding:7px;font-size:10px}
+ .resources{max-width:100%}.res{font-size:10px;padding:6px}
+ .mobile{display:flex;position:sticky;bottom:0;background:#0b1914;justify-content:space-around;border-top:1px solid #425b43;z-index:5}
+ .mobile button{background:none;border:0;color:#d5dfd3;padding:7px 3px;font-size:10px}
+ .mobile span{display:block;font-size:17px}
+ .shopGrid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<section id="login">
+ <div class="auth">
+  <div class="brand">✧ EVERWORLD</div>
+  <p>KINGDOM OF AURORA · BUILD YOUR EMPIRE</p>
+  <form id="loginForm">
+   <input id="username" placeholder="Tên nhân vật" required minlength="2" maxlength="16">
+   <input id="password" type="password" placeholder="Mật khẩu" required minlength="4">
+   <button class="gold" id="loginButton">TẠO NHÂN VẬT</button>
+  </form>
+  <button class="switch" id="authSwitch">Bạn đã có tài khoản? Đăng nhập</button>
+  <div id="message" style="color:#e5bd80;font-size:11px;min-height:18px"></div>
+ </div>
+</section>
+
+<section id="game" class="hidden">
+<header>
+ <div class="logo">✧ EVERWORLD</div>
+ <div class="resources">
+  <div class="res">🪵 <b id="wood">60</b></div>
+  <div class="res">🪨 <b id="stone">45</b></div>
+  <div class="res">⛓️ <b id="iron">10</b></div>
+  <div class="res">💎 <b id="crystal">0</b></div>
+  <div class="res">🌿 <b id="herb">0</b></div>
+  <div class="res">🫐 <b id="berry">10</b></div>
+  <div class="res">🍎 <b id="food">10</b></div>
+  <div class="res">🪙 <b id="coins">150</b></div>
+  <div class="res">⚡ <b id="energy">100</b></div>
+ </div>
+ <div style="font-size:11px">🧝 <span id="playerName"></span> <button class="tool" onclick="logout()">Thoát</button></div>
+</header>
+
+<div class="layout">
+<aside>
+ <p class="eyebrow">HÀNH TRÌNH</p>
+ <button class="nav active" data-view="world">🌍 Thế giới</button>
+ <button class="nav" data-view="build">🏗️ Xây dựng</button>
+ <button class="nav" data-view="empire">👑 Đế chế</button>
+ <button class="nav" data-view="quests">📜 Nhiệm vụ</button>
+ <button class="nav" data-view="inventory">🎒 Kho đồ</button>
+ <button class="nav" data-view="market">🏪 Chợ giao thương</button>
+ <button class="nav" data-view="profile">🧝 Hồ sơ</button>
+ <button class="nav" onclick="openChat()">💬 Chat thế giới</button>
+ <p class="eyebrow" style="margin-top:25px">MẸO KHÁM PHÁ</p>
+ <p class="sub">Click bản đồ để di chuyển. Click gian hàng để giao dịch. Chọn công cụ để khai thác. Mỗi hoạt động đều cần thời gian.</p>
+</aside>
+
+<main>
+<div style="margin-bottom:13px">
+ <div class="eyebrow">VÙNG ĐẤT ĐANG KHÁM PHÁ</div>
+ <h1>Aurora Island</h1>
+ <div class="sub">Khám phá thế giới, giao thương và xây dựng vương quốc của riêng bạn.</div>
+</div>
+
+<section class="view active" id="view-world">
+<div class="world">
+ <div class="mapbox">
+  <canvas id="map"></canvas>
+  <div class="mapname"><b>EVERWORLD · AURORA</b><small>Thế giới mở rộng · 6 vùng đất</small></div>
+  <div class="mapcontrols">
+   <button class="tool" onclick="zoom(1.18)">＋</button>
+   <button class="tool" onclick="zoom(.85)">－</button>
+   <button class="tool" onclick="centerMap()">⌖</button>
+   <button class="tool" onclick="toggleQuick()">🏗️ Xây nhanh</button>
+   <button class="tool" onclick="openChat()">💬 Chat</button>
+  </div>
+  <div id="buildQuick" class="hidden">
+   <b style="font:15px Marcellus;color:var(--gold)">🏗️ Chọn công trình</b>
+   <div id="quickList"></div>
+   <button class="tool" style="width:100%;margin-top:8px" onclick="toggleQuick()">Đóng</button>
+  </div>
+  <div id="actionBox" class="hidden">
+   <div id="actionTitle">Đang làm việc...</div>
+   <div id="actionTime">0 giây</div>
+   <div id="actionBar"><div id="actionFill"></div></div>
+  </div>
+  <div class="maptools">
+   <button class="tool" onclick="gather('wood')">🪓 Chặt gỗ · 6s</button>
+   <button class="tool" onclick="gather('stone')">⛏️ Đập đá · 8s</button>
+   <button class="tool" onclick="gather('iron')">⚒️ Đào sắt · 10s</button>
+   <button class="tool" onclick="gather('herb')">🌿 Hái thuốc · 4s</button>
+   <button class="tool" onclick="gather('berry')">🫐 Hái quả · 4s</button>
+   <button class="tool" onclick="rest()">🛌 Nghỉ</button>
+  </div>
+  <div class="maphelp">Click để đi / chọn gian hàng · Kéo để kéo bản đồ · Cuộn để zoom</div>
+ </div>
+
+ <div class="side">
+  <div class="panel">
+   <h3>⚡ NHÂN VẬT</h3>
+   <div class="stat"><span>Năng lượng</span><b id="energyText">100/100</b></div>
+   <div class="bar"><div id="energyBar" style="width:100%"></div></div>
+   <div class="stat"><span>Trạng thái</span><b id="status">Sẵn sàng</b></div>
+   <div class="stat"><span>Hoạt động</span><b id="activity">Đang khám phá</b></div>
+  </div>
+  <div class="panel">
+   <h3>👑 ĐẾ CHẾ</h3>
+   <div class="stat"><span>Dân số</span><b id="population">16</b></div>
+   <div class="stat"><span>Sức chứa</span><b id="capacity">20</b></div>
+   <div class="stat"><span>Công trình</span><b id="buildingCount">0</b></div>
+   <div class="stat"><span>Danh tiếng</span><b id="rep">0</b></div>
+  </div>
+  <div class="panel">
+   <h3>📜 TIẾN ĐỘ</h3>
+   <div class="stat"><span>Thu thập</span><b id="gatherQuest">0</b></div>
+   <div class="stat"><span>Xây dựng</span><b id="buildQuest">0</b></div>
+  </div>
+  <div class="panel">
+   <h3>✨ NHẬT KÝ ĐẢO</h3>
+   <div class="log" id="log">Bạn đã đặt chân đến Aurora Island.</div>
+  </div>
+  <div class="panel">
+   <h3>💬 THẾ GIỚI</h3>
+   <div class="log" id="chatPreview">Người dân đang sinh hoạt tại Aurora.</div>
+   <button class="tool" style="width:100%;margin-top:7px" onclick="openChat()">Mở kênh chat</button>
+  </div>
+ </div>
+</div>
+</section>
+
+<section class="view" id="view-build">
+ <div class="content">
+  <h2 style="font:23px Marcellus;color:var(--gold)">🏗️ Kiến trúc và xây dựng</h2>
+  <p class="sub">Chọn công trình, sau đó click vị trí muốn xây trên bản đồ. Nhân vật sẽ đi đến công trường và thi công trong thời gian quy định.</p>
+  <div class="tiles" id="buildTiles"></div>
+ </div>
+</section>
+
+<section class="view" id="view-empire">
+ <div class="content">
+  <h2 style="font:23px Marcellus;color:var(--gold)">👑 Phát triển đế chế</h2>
+  <p class="sub">Mở rộng khu dân cư, tăng sức chứa và sinh thêm dân. Dân cư đông hơn sẽ giúp đế chế phát triển.</p>
+  <div class="tiles" id="empireTiles"></div>
+ </div>
+</section>
+
+<section class="view" id="view-quests">
+ <div class="content"><h2 style="font:23px Marcellus;color:var(--gold)">📜 Nhiệm vụ</h2><div class="tiles" id="questTiles"></div></div>
+</section>
+
+<section class="view" id="view-inventory">
+ <div class="content"><h2 style="font:23px Marcellus;color:var(--gold)">🎒 Kho tài nguyên</h2><div class="tiles" id="inventory"></div></div>
+</section>
+
+<section class="view" id="view-market">
+ <div class="content">
+  <h2 style="font:23px Marcellus;color:var(--gold)">🏪 Chợ Aurora</h2>
+  <p class="sub">Chọn gian hàng trên bản đồ hoặc giao dịch tại đây với các thương nhân NPC.</p>
+  <div class="tiles" id="market"></div>
+ </div>
+</section>
+
+<section class="view" id="view-profile">
+ <div class="content"><h2 style="font:23px Marcellus;color:var(--gold)">🧝 Hồ sơ nhân vật</h2><div id="profile"></div></div>
+</section>
+</main>
+</div>
+
+<nav class="mobile">
+ <button data-view="world"><span>🌍</span>Thế giới</button>
+ <button data-view="build"><span>🏗️</span>Xây dựng</button>
+ <button data-view="empire"><span>👑</span>Đế chế</button>
+ <button data-view="market"><span>🏪</span>Chợ</button>
+ <button onclick="openChat()"><span>💬</span>Chat</button>
+</nav>
+</section>
+
+<div id="shopModal" class="hidden">
+ <div class="modal">
+  <div class="modalHead"><h2 id="shopTitle">🏪 Gian hàng</h2><button class="close" onclick="closeShop()">Đóng ✕</button></div>
+  <p class="sub" id="shopDesc">Thương nhân đang chờ giao dịch.</p>
+  <div class="shopGrid" id="shopItems"></div>
+ </div>
+</div>
+
+<div id="chatModal" class="hidden">
+ <div class="modal">
+  <div class="modalHead"><h2>💬 Kênh chat thế giới</h2><button class="close" onclick="closeChat()">Đóng ✕</button></div>
+  <p class="sub">Cộng đồng người chơi mô phỏng · NPC tự động trò chuyện</p>
+  <div id="chatMessages"></div>
+  <form class="chatForm" id="chatForm"><input id="chatInput" maxlength="120" placeholder="Nhập tin nhắn của bạn..."><button class="gold">Gửi</button></form>
+ </div>
+</div>
+
+<div id="toast" class="hidden"></div>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const fresh=()=>({
+ wood:60,stone:45,iron:10,crystal:0,herb:0,berry:10,coins:150,energy:100,rep:0,
+ gathered:0,built:0,population:16,capacity:20,food:10,player:{x:560,y:650},buildings:[],
+ nodes:null,chat:[]
+});
+let name='',S=fresh(),registerMode=true,selectedBuild=null,action=null;
+let cam={x:560,y:650,scale:.48},viewW=900,viewH=600,drag=null,lastFrame=0;
+let player={x:560,y:650,tx:560,ty:650,walk:0,dir:1};
+let nodes=[],npcs=[],chatLines=[],toastTimer=null,currentShop=null;
+const WORLD={w:3600,h:2600};
+const info={
+ wood:{name:'Gỗ',emoji:'🪵',time:6,gain:5,energy:8,tool:'🪓'},
+ stone:{name:'Đá',emoji:'🪨',time:8,gain:4,energy:10,tool:'⛏️'},
+ iron:{name:'Quặng sắt',emoji:'⛓️',time:10,gain:3,energy:13,tool:'⚒️'},
+ herb:{name:'Thảo dược',emoji:'🌿',time:4,gain:3,energy:4,tool:'🌿'},
+ berry:{name:'Quả mọng',emoji:'🫐',time:4,gain:4,energy:4,tool:'🫐'}
+};
+const structures={
+ House:{name:'Biệt thự gỗ',emoji:'🏡',wood:22,stone:8,w:170,h:135,time:20,capacity:5},
+ StoneHouse:{name:'Nhà đá lớn',emoji:'🏠',wood:35,stone:35,w:190,h:155,time:30,capacity:8},
+ Farm:{name:'Nông trại',emoji:'🌾',wood:30,stone:12,w:230,h:135,time:25,capacity:0},
+ Warehouse:{name:'Kho hàng lớn',emoji:'📦',wood:55,stone:35,w:240,h:190,time:40,capacity:0},
+ Lumber:{name:'Xưởng cưa',emoji:'🪚',wood:45,stone:30,w:235,h:175,time:38,capacity:0},
+ Forge:{name:'Lò rèn',emoji:'⚒️',wood:35,stone:55,w:215,h:185,time:45,capacity:0},
+ Market:{name:'Đại chợ Aurora',emoji:'🏪',wood:75,stone:55,w:310,h:220,time:55,capacity:0},
+ Tower:{name:'Tháp canh',emoji:'🗼',wood:50,stone:75,w:145,h:280,time:55,capacity:0},
+ Fountain:{name:'Đài phun nước',emoji:'⛲',wood:15,stone:65,w:180,h:180,time:35,capacity:0},
+ Castle:{name:'Lâu đài Aurora',emoji:'🏰',wood:160,stone:220,w:430,h:360,time:90,capacity:15}
+};
+const stalls=[
+ {id:'general',name:'Tạp hóa Aurora',emoji:'🏪',x:1390,y:790,desc:'Thực phẩm và vật liệu thông dụng.'},
+ {id:'miner',name:'Gian hàng thợ mỏ',emoji:'⚒️',x:1530,y:790,desc:'Mua bán đá và quặng.'},
+ {id:'herbal',name:'Quầy thảo dược',emoji:'🌿',x:1390,y:940,desc:'Các loại thảo dược quý.'},
+ {id:'food',name:'Chợ nông sản',emoji:'🫐',x:1530,y:940,desc:'Thực phẩm cho cư dân.'},
+ {id:'rare',name:'Thương nhân quý hiếm',emoji:'💎',x:1680,y:860,desc:'Giao dịch vật phẩm hiếm.'}
+];
+function accounts(){try{return JSON.parse(localStorage.getItem('everworld2_accounts')||'{}')}catch(e){return {}}}
+function save(){
+ if(!name)return;
+ let a=accounts();a[name]={password:a[name]?.password||'',game:S};
+ localStorage.setItem('everworld2_accounts',JSON.stringify(a));
+}
+function notify(t){
+ $('toast').textContent=t;$('toast').classList.remove('hidden');
+ clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.add('hidden'),2600);
+}
+function log(t){$('log').textContent=t}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+$('authSwitch').onclick=()=>{
+ registerMode=!registerMode;
+ $('loginButton').textContent=registerMode?'TẠO NHÂN VẬT':'ĐĂNG NHẬP';
+ $('authSwitch').textContent=registerMode?'Bạn đã có tài khoản? Đăng nhập':'Chưa có tài khoản? Đăng ký';
+ $('message').textContent='';
+};
+$('loginForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ let n=$('username').value.trim(),p=$('password').value,a=accounts();
+ if(registerMode){
+  if(a[n]){$('message').textContent='Tên nhân vật đã tồn tại.';return}
+  a[n]={password:p,game:fresh()};
+  localStorage.setItem('everworld2_accounts',JSON.stringify(a));
+ }else if(!a[n]||a[n].password!==p){
+  $('message').textContent='Tên nhân vật hoặc mật khẩu không đúng.';return;
+ }
+ name=n;
+ S=Object.assign(fresh(),a[n].game||{});
+ S.buildings=S.buildings||[];S.chat=S.chat||[];
+ S.population=S.population||16;S.capacity=S.capacity||20;
+ player={x:S.player?.x??560,y:S.player?.y??650,tx:S.player?.x??560,ty:S.player?.y??650,walk:0,dir:1};
+ $('login').classList.add('hidden');$('game').classList.remove('hidden');
+ $('playerName').textContent=name;
+ $('profile').innerHTML='<p class="sub">Nhà khai phá <b>'+escapeHTML(name)+'</b> · Aurora Island</p><p class="sub">Hãy biến vùng đất hoang sơ thành một đế chế thịnh vượng.</p>';
+ initWorld();loadChat();renderAll();resize();centerMap();
+ notify('Chào mừng đến EVERWORLD!');
+});
+function logout(){
+ if(action)cancelAction(false);
+ S.player={x:player.x,y:player.y};save();name='';
+ $('game').classList.add('hidden');$('login').classList.remove('hidden');$('password').value='';
+}
+function rand(seed){let x=Math.sin(seed*127.1+311.7)*43758.5453;return x-Math.floor(x)}
+function zoneAt(x,y){
+ if(x>2450&&y<950)return'mountain';
+ if(x>1150&&x<1850&&y>500&&y<1150)return'market';
+ if((x>250&&x<1050&&y>300&&y<1050)||(x>2100&&x<3050&&y>1250&&y<2200))return'village';
+ if(x<1200&&y>1150)return'forest';
+ if(x>1150&&y>1900)return'farm';
+ return'grassland';
+}
+function initWorld(){
+ nodes=[];npcs=[];
+ if(Array.isArray(S.nodes)&&S.nodes.length){nodes=S.nodes.map(n=>({...n}));}
+ else{
+  for(let i=0;i<430;i++){
+   let x=90+rand(i+5)*3420,y=80+rand(i+177)*2440,z=zoneAt(x,y);
+   if(z==='market'||z==='village')continue;
+   let type=z==='mountain'?(rand(i+44)>.42?'stone':'iron'):(z==='farm'?(rand(i+44)>.48?'berry':'herb'):(rand(i+44)>.28?'wood':rand(i+3)>.5?'herb':'berry'));
+   nodes.push({x,y,type,amount:4+Math.floor(rand(i+800)*7),seed:i});
+  }
+  S.nodes=nodes.map(n=>({...n}));
+ }
+ const names=['Lina','Borin','Mira','Tomas','Eli','Nora','Kiro','Ayla','Finn','Rosa','Milo','Sera','Darin','Pia','Orin','Lumi','Arin','Vera','Niko','Talia','Eron','Mina','Theo','Iris'];
+ for(let i=0;i<names.length;i++){
+  let x,y;
+  if(i<12){x=400+rand(i+900)*600;y=440+rand(i+1000)*520;}
+  else{x=2200+rand(i+1500)*650;y=1450+rand(i+1600)*520;}
+  npcs.push({name:names[i],x,y,tx:x,ty:y,walk:rand(i+99)*6,dir:1,speed:10+rand(i+66)*13});
+ }
+}
+function resize(){
+ let r=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);
+ canvas.width=Math.floor(r.width*d);canvas.height=Math.floor(r.height*d);
+ ctx.setTransform(d,0,0,d,0,0);viewW=r.width;viewH=r.height;draw();
+}
+window.addEventListener('resize',resize);
+const canvas=$('map'),ctx=canvas.getContext('2d');
+function worldToScreen(x,y){return{x:(x-cam.x)*cam.scale+viewW/2,y:(y-cam.y)*cam.scale+viewH/2}}
+function screenToWorld(x,y){return{x:(x-viewW/2)/cam.scale+cam.x,y:(y-viewH/2)/cam.scale+cam.y}}
+function centerMap(){cam.x=player.x;cam.y=player.y;draw()}
+function zoom(f){cam.scale=Math.max(.3,Math.min(1.55,cam.scale*f));draw()}
+function path(points,color,width){
+ ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
+ ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();
+}
+function draw(){
+ if(!viewW)return;
+ ctx.clearRect(0,0,viewW,viewH);
+ ctx.fillStyle='#397d83';ctx.fillRect(0,0,viewW,viewH);
+ let p=worldToScreen(0,0);
+ ctx.save();ctx.translate(p.x,p.y);ctx.scale(cam.scale,cam.scale);
+ let land=ctx.createLinearGradient(0,0,WORLD.w,WORLD.h);
+ land.addColorStop(0,'#aab17a');land.addColorStop(.35,'#8fa66e');land.addColorStop(.7,'#78965d');land.addColorStop(1,'#557b4e');
+ ctx.fillStyle='#d5c18b';ctx.fillRect(0,0,WORLD.w,WORLD.h);
+ ctx.fillStyle=land;ctx.fillRect(35,35,WORLD.w-70,WORLD.h-70);
+ ctx.fillStyle='#6c925b';ctx.beginPath();ctx.ellipse(550,1750,760,760,-.3,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#a6b47d';ctx.beginPath();ctx.ellipse(2720,1750,760,690,.2,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#b0b584';ctx.beginPath();ctx.ellipse(1750,350,900,390,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#9cac78';ctx.beginPath();ctx.ellipse(1550,1300,650,550,-.2,0,Math.PI*2);ctx.fill();
+ ctx.beginPath();ctx.moveTo(80,900);ctx.bezierCurveTo(520,700,760,1050,1120,1110);ctx.bezierCurveTo(1510,1190,1640,1450,2050,1350);ctx.bezierCurveTo(2500,1240,2820,1570,3500,1450);
+ ctx.strokeStyle='#347c86';ctx.lineWidth=100;ctx.stroke();ctx.strokeStyle='#75c2c0';ctx.lineWidth=76;ctx.stroke();ctx.strokeStyle='#b4e0d4';ctx.lineWidth=4;ctx.stroke();
+ ctx.beginPath();ctx.moveTo(2450,70);ctx.bezierCurveTo(2220,360,2400,650,2140,900);ctx.bezierCurveTo(1980,1060,2020,1190,2050,1350);ctx.strokeStyle='#347c86';ctx.lineWidth=54;ctx.stroke();ctx.strokeStyle='#80c8c2';ctx.lineWidth=37;ctx.stroke();
+ [[800,2050,190,130],[3150,700,150,105],[1850,2050,120,85]].forEach(([x,y,rx,ry])=>{
+  ctx.beginPath();ctx.ellipse(x,y,rx,ry,-.2,0,Math.PI*2);ctx.fillStyle='#347c86';ctx.fill();
+  ctx.beginPath();ctx.ellipse(x,y-4,rx*.9,ry*.86,-.2,0,Math.PI*2);ctx.fillStyle='#68b3b0';ctx.fill();
+ });
+ path([[560,650],[850,720],[1120,850],[1450,900],[1780,1000],[2140,1280],[2520,1580],[2820,1830]],'#a98d61',42);
+ path([[560,650],[850,720],[1120,850],[1450,900],[1780,1000],[2140,1280],[2520,1580],[2820,1830]],'#e2ca91',28);
+ path([[560,650],[500,980],[430,1250],[360,1570],[450,1900]],'#a98d61',30);
+ path([[560,650],[500,980],[430,1250],[360,1570],[450,1900]],'#e2ca91',19);
+ path([[1550,900],[1650,650],[1900,430],[2250,280],[2600,250]],'#a98d61',28);
+ path([[1550,900],[1650,650],[1900,430],[2250,280],[2600,250]],'#e2ca91',17);
+ for(let i=0;i<22;i++){
+  let x=2450+(i%6)*145,y=170+Math.floor(i/6)*145+Math.sin(i*1.2)*35,h=145+rand(i+42)*150;
+  ctx.beginPath();ctx.moveTo(x-95,y+100);ctx.lineTo(x,y-h);ctx.lineTo(x+105,y+100);ctx.closePath();ctx.fillStyle=i%2?'#69796c':'#7d8c7c';ctx.fill();
+  ctx.beginPath();ctx.moveTo(x,y-h);ctx.lineTo(x+30,y-h+58);ctx.lineTo(x+5,y-h+45);ctx.lineTo(x-14,y-h+65);ctx.closePath();ctx.fillStyle='#e8e8d7';ctx.fill();
+  ctx.strokeStyle='#566a5c';ctx.lineWidth=3;ctx.stroke();
+ }
+ for(let i=0;i<260;i++){
+  let x=70+rand(i+2000)*1100,y=1120+rand(i+2200)*1320;
+  if((x>260&&x<1050&&y>300&&y<1050)||(x>1100&&x<1850&&y>500&&y<1150))continue;
+  drawTree(x,y,.65+rand(i+33)*.75);
+ }
+ for(let i=0;i<100;i++){
+  let x=1200+rand(i+3300)*2100,y=70+rand(i+3400)*2300;
+  if(zoneAt(x,y)==='market'||zoneAt(x,y)==='village'||zoneAt(x,y)==='mountain')continue;
+  drawTree(x,y,.45+rand(i+30)*.55);
+ }
+ for(let i=0;i<18;i++)drawHouse(350+(i%6)*112,430+Math.floor(i/6)*105,i);
+ for(let i=0;i<22;i++)drawHouse(2200+(i%6)*118,1470+Math.floor(i/6)*108,i+20);
+ for(let r=0;r<7;r++)for(let c=0;c<10;c++){
+  let x=1350+c*52,y=2040+r*34;
+  ctx.fillStyle=r%2?'#a7a45d':'#c0b56b';ctx.fillRect(x,y,42,20);
+  ctx.strokeStyle='#6f8c4e';ctx.lineWidth=2;ctx.strokeRect(x,y,42,20);
+ }
+ ctx.fillStyle='#d0b77e';ctx.beginPath();ctx.ellipse(1490,850,390,290,0,0,Math.PI*2);ctx.fill();
+ for(let i=0;i<stalls.length;i++)drawStall(stalls[i].x,stalls[i].y,i,stalls[i].name);
+ drawBridge(1120,1110);drawBridge(2050,1350);drawBridge(2520,1580);
+ ctx.textAlign='center';ctx.font='bold 48px Georgia';ctx.fillStyle='#f4e5b9';ctx.shadowColor='#263526';ctx.shadowBlur=8;
+ ctx.fillText('LÀNG AURORA',650,350);
+ ctx.fillText('KHU CHỢ TRUNG TÂM',1490,510);
+ ctx.fillText('KHU DÂN CƯ MỚI',2600,1390);
+ ctx.fillText('NÔNG TRẠI PHÍA NAM',1740,2350);
+ ctx.fillText('RỪNG CỔ THỤ',550,2350);
+ ctx.fillText('DÃY NÚI PHA LÊ',2850,120);
+ ctx.shadowBlur=0;
+ for(const b of S.buildings||[])drawBuilding(b);
+ for(const n of nodes)if(n.amount>0)drawNode(n);
+ for(const npc of npcs)drawPerson(npc.x,npc.y,npc.walk,npc.dir,'#d5c6a1',npc.name,false);
+ drawPerson(player.x,player.y,player.walk,player.dir,'#f0c47b',name,true);
+ if(action&&action.target&&action.kind!=='birth'){
+  ctx.beginPath();ctx.arc(action.target.x,action.target.y,25,0,Math.PI*2);ctx.strokeStyle='#f8df91';ctx.lineWidth=3;ctx.stroke();
+ }
+ ctx.restore();
+}
+function drawTree(x,y,s){
+ ctx.save();ctx.translate(x,y);ctx.scale(s,s);
+ ctx.fillStyle='#0003';ctx.beginPath();ctx.ellipse(5,3,22,8,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#624d35';ctx.fillRect(-5,-18,10,27);
+ ctx.fillStyle='#284b32';ctx.beginPath();ctx.arc(0,-35,23,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#3e7041';ctx.beginPath();ctx.arc(-11,-43,15,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#5c8b51';ctx.beginPath();ctx.arc(9,-49,13,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#83a56a';ctx.beginPath();ctx.arc(-5,-55,7,0,Math.PI*2);ctx.fill();
+ ctx.restore();
+}
+function drawHouse(x,y,i){
+ ctx.save();ctx.translate(x,y);
+ ctx.fillStyle='#0004';ctx.beginPath();ctx.ellipse(0,9,55,14,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle=i%2?'#9b805b':'#76583b';ctx.fillRect(-38,-25,76,50);
+ ctx.fillStyle=i%2?'#9b5844':'#b46b4b';ctx.beginPath();ctx.moveTo(-48,-25);ctx.lineTo(0,-68);ctx.lineTo(48,-25);ctx.closePath();ctx.fill();
+ ctx.strokeStyle='#e0b981';ctx.lineWidth=3;ctx.stroke();
+ ctx.fillStyle='#e2c58d';ctx.fillRect(-9,2,18,23);
+ ctx.fillStyle='#8ec0c1';ctx.fillRect(16,-16,13,13);
+ ctx.fillStyle='#e6d7a6';ctx.fillRect(-30,-16,10,10);
+ ctx.restore();
+}
+function drawStall(x,y,i,label){
+ ctx.save();ctx.translate(x,y);
+ ctx.fillStyle='#0004';ctx.beginPath();ctx.ellipse(0,13,43,10,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#76583b';ctx.fillRect(-31,-1,62,27);
+ ctx.fillStyle=['#b75e4c','#d2a34d','#668d70','#8a6a9c','#5b8e9c'][i%5];
+ ctx.beginPath();ctx.moveTo(-36,-2);ctx.lineTo(-28,-34);ctx.lineTo(28,-34);ctx.lineTo(36,-2);ctx.closePath();ctx.fill();
+ ctx.strokeStyle='#e6ca92';ctx.lineWidth=3;ctx.stroke();
+ ctx.fillStyle='#f1e2b6';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText(label,0,-43);
+ ctx.fillStyle='#624a31';ctx.fillRect(-4,3,8,23);
+ ctx.restore();
+}
+function drawBridge(x,y){
+ ctx.save();ctx.translate(x,y);ctx.fillStyle='#6b5038';ctx.fillRect(-44,-14,88,28);
+ ctx.strokeStyle='#d0b17b';ctx.lineWidth=5;ctx.strokeRect(-44,-14,88,28);
+ for(let i=-3;i<=3;i++)ctx.fillRect(i*12-2,-14,4,28);
+ ctx.restore();
+}
+function drawBuilding(b){
+ let x=b.x,y=b.y,w=b.w,h=b.h;ctx.save();ctx.translate(x,y);
+ ctx.fillStyle='#0005';ctx.beginPath();ctx.ellipse(0,12,w*.57,18,0,0,Math.PI*2);ctx.fill();
+ let wall=b.type==='Castle'?'#969c96':b.type==='Forge'?'#626b68':'#a47a50';
+ ctx.fillStyle=wall;ctx.fillRect(-w/2,-h*.47,w,h*.58);
+ ctx.fillStyle=b.type==='Castle'?'#747e79':b.type==='Market'?'#a85f45':'#9c5742';
+ ctx.beginPath();ctx.moveTo(-w*.58,-h*.44);ctx.lineTo(0,-h);ctx.lineTo(w*.58,-h*.44);ctx.closePath();ctx.fill();
+ ctx.strokeStyle='#e0c58f';ctx.lineWidth=5;ctx.stroke();
+ ctx.fillStyle='#d9c18e';ctx.fillRect(-w*.12,-h*.35,w*.24,h*.46);
+ ctx.fillStyle='#7eb0b1';ctx.fillRect(-w*.37,-h*.35,w*.15,h*.15);ctx.fillRect(w*.22,-h*.35,w*.15,h*.15);
+ ctx.strokeStyle='#594832';ctx.lineWidth=5;ctx.strokeRect(-w/2,-h*.47,w,h*.58);
+ if(b.type==='Castle'||b.type==='Tower'){
+  for(let i=-1;i<=1;i++){
+   ctx.fillStyle='#828d87';ctx.fillRect(i*w*.3-12,-h*.82,24,h*.35);
+   ctx.fillStyle='#d2d0c1';ctx.fillRect(i*w*.3-15,-h*.84,30,10);
+  }
+ }
+ if(!b.complete){
+  ctx.strokeStyle='#e6c77d';ctx.lineWidth=7;ctx.setLineDash([12,9]);
+  ctx.strokeRect(-w*.58,-h,w*1.16,h*1.05);ctx.setLineDash([]);
+  ctx.fillStyle='#f3d99d';ctx.font='bold 18px sans-serif';ctx.textAlign='center';
+  ctx.fillText('ĐANG XÂY '+Math.round((b.progress||0)*100)+'%',0,h*.25);
+ }else{
+  ctx.fillStyle='#f2d89b';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.fillText(b.name,0,h*.25);
+ }
+ ctx.restore();
+}
+function drawNode(n){
+ ctx.save();ctx.translate(n.x,n.y);
+ if(n.type==='wood')drawTree(0,0,.85);
+ else if(n.type==='stone'||n.type==='iron'){
+  ctx.fillStyle=n.type==='iron'?'#777e83':'#8c928b';
+  ctx.beginPath();ctx.moveTo(-17,5);ctx.lineTo(-12,-13);ctx.lineTo(3,-23);ctx.lineTo(20,-7);ctx.lineTo(17,8);ctx.closePath();ctx.fill();
+  ctx.fillStyle=n.type==='iron'?'#a7c2c6':'#c5c5b4';
+  ctx.beginPath();ctx.moveTo(-7,-9);ctx.lineTo(3,-19);ctx.lineTo(11,-8);ctx.closePath();ctx.fill();
+ }else{
+  ctx.fillStyle=n.type==='herb'?'#4d8c4b':'#4f944b';
+  for(let i=0;i<4;i++){ctx.beginPath();ctx.ellipse((i-1.5)*5,-5-(i%2)*5,4,9,i*.4,0,Math.PI*2);ctx.fill()}
+  if(n.type==='berry'){ctx.fillStyle='#a84d78';ctx.beginPath();ctx.arc(0,-10,4,0,Math.PI*2);ctx.arc(8,-5,4,0,Math.PI*2);ctx.fill()}
+ }
+ ctx.restore();
+}
+function drawPerson(x,y,walk,dir,color,label,isPlayer){
+ ctx.save();ctx.translate(x,y);
+ let step=Math.sin(walk*9)*3;
+ ctx.fillStyle='#0004';ctx.beginPath();ctx.ellipse(0,7,10,4,0,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#493c32';ctx.lineWidth=5;ctx.lineCap='round';ctx.beginPath();
+ ctx.moveTo(-3,-1);ctx.lineTo(-4+step,7);ctx.moveTo(3,-1);ctx.lineTo(4-step,7);ctx.stroke();
+ ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(-8,-18,16,19,5);ctx.fill();
+ ctx.fillStyle='#e9bb8c';ctx.beginPath();ctx.arc(0,-24,7,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#594432';ctx.beginPath();ctx.arc(-1,-27,7,Math.PI,Math.PI*2);ctx.fill();
+ if(isPlayer){ctx.fillStyle='#f3df9e';ctx.fillRect(-10,-37,20,3)}
+ if(label){
+  ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillStyle='#fff4d6';
+  ctx.shadowColor='#263526';ctx.shadowBlur=4;ctx.fillText(label,0,-41);
+ }
+ ctx.restore();
+}
+function nearestNode(type){
+ return nodes.filter(n=>n.type===type&&n.amount>0).sort((a,b)=>Math.hypot(a.x-player.x,a.y-player.y)-Math.hypot(b.x-player.x,b.y-player.y))[0];
+}
+function gather(type){
+ if(action){notify('Bạn đang bận một hoạt động khác.');return}
+ let item=info[type];
+ if(S.energy<item.energy){notify('Không đủ năng lượng. Hãy nghỉ ngơi!');return}
+ let node=nearestNode(type);
+ if(!node){notify('Khu vực này đã hết tài nguyên.');return}
+ action={kind:'gather',type,target:node,phase:'walking',duration:item.time,elapsed:0};
+ player.tx=node.x;player.ty=node.y;
+ $('activity').textContent='Đang đến điểm khai thác';$('status').textContent='Di chuyển';
+ $('actionBox').classList.remove('hidden');
+ $('actionTitle').textContent=item.tool+' Đang tiến đến '+item.name;
+ $('actionFill').style.width='0%';
+ log('Bạn đang đi đến điểm khai thác '+item.name+'.');draw();
+}
+function beginConstruction(type,x,y){
+ let b=structures[type];if(!b||action)return;
+ if(x<70||y<70||x>WORLD.w-70||y>WORLD.h-70||zoneAt(x,y)==='mountain'||zoneAt(x,y)==='market'){notify('Hãy chọn khu đất trống ở vùng có thể xây dựng, tránh chợ và núi.');return}
+ if(S.wood<b.wood||S.stone<b.stone){notify('Không đủ tài nguyên để xây '+b.name+'.');return}
+ if((S.buildings||[]).some(q=>Math.hypot(q.x-x,q.y-y)<Math.max(q.w,q.h)*.65)){notify('Vị trí này quá gần công trình khác.');return}
+ S.wood-=b.wood;S.stone-=b.stone;
+ let building={type,name:b.name,emoji:b.emoji,x,y,w:b.w,h:b.h,progress:0,complete:false};
+ S.buildings.push(building);
+ action={kind:'build',target:building,phase:'walking',duration:b.time,elapsed:0};
+ player.tx=x;player.ty=y;
+ $('actionBox').classList.remove('hidden');
+ $('actionTitle').textContent='🏗️ Đang di chuyển đến công trường';
+ $('actionFill').style.width='0%';
+ $('activity').textContent='Đang đến công trường';
+ log('Đã tập kết vật liệu. Nhân vật đang đến công trường.');
+ renderAll();save();draw();
+}
+function placeBuilding(type){
+ selectedBuild=type;toggleQuick(false);showView('world');
+ notify('Đã chọn '+structures[type].name+'. Click vào vị trí muốn xây.');
+}
+function toggleQuick(force){
+ let el=$('buildQuick');
+ if(force===false)el.classList.add('hidden');else el.classList.toggle('hidden');
+}
+function finishAction(){
+ if(!action)return;
+ if(action.kind==='gather'){
+  let a=action,n=a.target,item=info[a.type];
+  if(n.amount<=0){notify('Tài nguyên đã được khai thác hết.');cancelAction(false);return}
+  let gain=Math.min(item.gain,n.amount);
+  n.amount-=gain;S.nodes=nodes.map(q=>({...q}));S[a.type]+=gain;S.energy=Math.max(0,S.energy-item.energy);
+  S.gathered+=gain;S.rep++;
+  if(a.type==='berry')S.food+=gain;
+  notify('Hoàn thành! Nhận '+gain+' '+item.name+'.');
+  log('Bạn đã thu thập '+gain+' '+item.name+'.');
+ }else if(action.kind==='build'){
+  action.target.complete=true;action.target.progress=1;
+  S.built++;S.rep+=5;
+  let capacity=structures[action.target.type].capacity||0;
+  S.capacity+=capacity;
+  notify('🎉 '+action.target.name+' đã hoàn thành!');
+  log('Công trình '+action.target.name+' đã được xây xong.');
+ }else if(action.kind==='birth'){
+  S.population++;S.rep+=2;
+  notify('🎉 Một cư dân mới đã gia nhập đế chế!');
+  log('Dân số tăng lên '+S.population+'. Đế chế ngày càng phát triển.');
+ }
+ action=null;$('actionBox').classList.add('hidden');
+ $('activity').textContent='Đang khám phá';$('status').textContent='Sẵn sàng';
+ renderAll();save();draw();
+}
+function cancelAction(refund=true){
+ if(!action)return;
+ if(action.kind==='build'){
+  let b=action.target;
+  if(refund){let s=structures[b.type];S.wood+=s.wood;S.stone+=s.stone}
+  S.buildings=S.buildings.filter(x=>x!==b);
+ }
+ action=null;$('actionBox').classList.add('hidden');
+ $('activity').textContent='Đang khám phá';$('status').textContent='Sẵn sàng';
+ renderAll();save();draw();
+}
+function rest(){
+ if(action){notify('Hãy hoàn thành hoạt động trước.');return}
+ if(S.energy>=100){notify('Năng lượng đã đầy!');return}
+ S.energy=Math.min(100,S.energy+35);renderAll();notify('Bạn nghỉ ngơi và hồi 35 năng lượng.');
+}
+function startBirth(){
+ if(action){notify('Hãy hoàn thành hoạt động hiện tại trước.');return}
+ if(S.population>=S.capacity){notify('Khu dân cư đã hết sức chứa. Hãy xây thêm nhà!');return}
+ if(S.food<8&&S.berry<8){notify('Cần ít nhất 8 lương thực (hoặc 8 quả mọng) để sinh thêm dân.');return}
+ if(S.coins<20){notify('Cần thêm 20 xu để chăm sóc cư dân mới.');return}
+ if(S.food>=8)S.food-=8;else S.berry-=8;
+ S.coins-=20;
+ action={kind:'birth',phase:'working',target:{x:player.x,y:player.y},duration:45,elapsed:0};
+ $('actionBox').classList.remove('hidden');
+ $('actionTitle').textContent='👶 Đang chuẩn bị đón cư dân mới';
+ $('actionFill').style.width='0%';
+ $('activity').textContent='Đang sinh dân';$('status').textContent='Đang phát triển';
+ notify('Quá trình sinh dân bắt đầu. Đã dùng 8 lương thực và 20 xu · 45 giây.');
+ renderAll();save();
+}
+function renderBuildOptions(){
+ let html=Object.entries(structures).map(([id,b])=>
+ `<div class="quickitem"><span>${b.emoji} ${b.name}<br><small>🪵${b.wood} 🪨${b.stone} · ${b.time}s</small></span><button onclick="placeBuilding('${id}')">Chọn</button></div>`
+ ).join('');
+ $('quickList').innerHTML=html;
+ $('buildTiles').innerHTML=Object.entries(structures).map(([id,b])=>
+ `<div class="tile"><div style="font-size:35px">${b.emoji}</div><h3>${b.name}</h3><p>Kích thước: ${b.w} × ${b.h}<br>Chi phí: 🪵 ${b.wood} · 🪨 ${b.stone}<br>Thời gian xây: ${b.time} giây<br>Sức chứa dân: +${b.capacity||0}</p><button onclick="placeBuilding('${id}')">Chọn vị trí xây</button></div>`
+ ).join('');
+}
+function renderInventory(){
+ $('inventory').innerHTML=Object.entries(info).concat([['crystal',{emoji:'💎',name:'Pha lê'}]]).map(([id,r])=>
+ `<div class="tile"><div style="font-size:28px">${r.emoji}</div><h3>${r.name}</h3><div style="color:var(--gold);font-size:20px">${S[id]||0}</div></div>`
+ ).join('')+`<div class="tile"><div style="font-size:28px">🍎</div><h3>Thực phẩm dự trữ</h3><div style="color:var(--gold);font-size:20px">${S.food}</div></div>`;
+}
+const goods=[
+ {id:'wood',name:'Gỗ',emoji:'🪵',price:8},
+ {id:'stone',name:'Đá',emoji:'🪨',price:12},
+ {id:'iron',name:'Quặng sắt',emoji:'⛓️',price:25},
+ {id:'herb',name:'Thảo dược',emoji:'🌿',price:10},
+ {id:'berry',name:'Quả mọng',emoji:'🫐',price:7},
+ {id:'crystal',name:'Pha lê',emoji:'💎',price:45}
+];
+function marketCard(g){
+ return `<div class="tile"><span class="tag">NPC · Gian hàng</span><h3>${g.emoji} ${g.name}</h3><p>Thương nhân mô phỏng đang giao dịch.</p><b style="color:var(--gold)">${g.price} vàng / món</b><br><button onclick="buy('${g.id}',${g.price})">Mua 1</button><button onclick="sell('${g.id}',${Math.floor(g.price*.55)})">Bán 1</button></div>`;
+}
+function renderMarket(){$('market').innerHTML=goods.map(marketCard).join('')}
+function buy(id,p){
+ if(S.coins<p){notify('Không đủ vàng!');return}
+ S.coins-=p;S[id]=(S[id]||0)+1;
+ if(id==='berry')S.food++;
+ renderAll();save();notify('Đã mua hàng!');
+}
+function sell(id,p){
+ if(!S[id]){notify('Bạn không có món hàng này.');return}
+ S[id]--;S.coins+=p;
+ if(id==='berry')S.food=Math.max(0,S.food-1);
+ renderAll();save();notify('Đã bán hàng!');
+}
+function openShop(id){
+ let s=stalls.find(x=>x.id===id);if(!s)return;
+ currentShop=id;
+ $('shopTitle').textContent=s.emoji+' '+s.name;
+ $('shopDesc').textContent=s.desc+' Thương nhân NPC sẵn sàng giao dịch.';
+ $('shopItems').innerHTML=goods.map(g=>
+ `<div class="shopItem"><b>${g.emoji} ${g.name}</b><p>Giá mua: ${g.price} vàng · Giá bán: ${Math.floor(g.price*.55)} vàng</p><button class="tool" onclick="buy('${g.id}',${g.price})">Mua 1</button><button class="tool" onclick="sell('${g.id}',${Math.floor(g.price*.55)})">Bán 1</button></div>`
+ ).join('');
+ $('shopModal').classList.remove('hidden');
+}
+function closeShop(){$('shopModal').classList.add('hidden');currentShop=null}
+function renderEmpire(){
+ $('empireTiles').innerHTML=`
+ <div class="tile"><div style="font-size:30px">👨‍👩‍👧‍👦</div><h3>Dân cư</h3><p>Dân số hiện tại: ${S.population}<br>Sức chứa: ${S.capacity}<br>Chi phí: 8 lương thực + 20 xu<br>Thời gian: 45 giây</p><button onclick="startBirth()">👶 Sinh thêm dân · 45s</button></div>
+ <div class="tile"><div style="font-size:30px">🏡</div><h3>Mở rộng khu dân cư</h3><p>Xây nhà gỗ để tăng sức chứa 5 người. Nhà đá tăng 8 người.</p><button onclick="placeBuilding('House')">Xây nhà gỗ</button><button onclick="placeBuilding('StoneHouse')">Xây nhà đá</button></div>
+ <div class="tile"><div style="font-size:30px">🍎</div><h3>Thực phẩm</h3><p>Dự trữ hiện tại: ${S.food}. Hái quả hoặc mua tại chợ để chuẩn bị cho cư dân mới.</p><button onclick="showView('world')">Đi thu thập</button><button onclick="showView('market')">Đến chợ</button></div>
+ <div class="tile"><div style="font-size:30px">🏰</div><h3>Lãnh thổ</h3><p>Công trình đã xây: ${S.buildings.length}<br>Danh tiếng: ${S.rep}</p><span class="tag">Đế chế đang phát triển</span></div>`;
+}
+function renderQuests(){
+ $('questTiles').innerHTML=`
+ <div class="tile"><h3>🌲 Người khai phá</h3><p>Thu thập 20 tài nguyên.</p><b>${Math.min(20,S.gathered)}/20</b></div>
+ <div class="tile"><h3>🏡 Nơi an cư</h3><p>Hoàn thành công trình đầu tiên.</p><b>${S.built}/1</b></div>
+ <div class="tile"><h3>🏰 Kiến trúc sư</h3><p>Xây dựng lâu đài Aurora.</p><b>${S.buildings.some(b=>b.type==='Castle'&&b.complete)?'Hoàn thành':'Chưa hoàn thành'}</b></div>
+ <div class="tile"><h3>👨‍👩‍👧‍👦 Dân cư đông vui</h3><p>Phát triển dân số lên 25 người.</p><b>${Math.min(25,S.population)}/25</b></div>`;
+}
+function renderAll(){
+ for(let id of ['wood','stone','iron','crystal','herb','berry','coins','energy','food'])$(id).textContent=S[id]||0;
+ $('energyText').textContent=S.energy+'/100';$('energyBar').style.width=S.energy+'%';
+ $('buildingCount').textContent=S.buildings.length;$('rep').textContent=S.rep;
+ $('gatherQuest').textContent=Math.min(20,S.gathered)+'/20';$('buildQuest').textContent=S.built;
+ $('population').textContent=S.population;$('capacity').textContent=S.capacity;
+ $('status').textContent=S.energy<25?'Mệt mỏi':'Sẵn sàng';
+ renderBuildOptions();renderInventory();renderMarket();renderQuests();renderEmpire();
+}
+function showView(v){
+ document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+v));
+ document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===v));
+ if(v==='world')setTimeout(resize,20);
+}
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+
+function addChat(who,msg,system=false){
+ let item={who,msg,system,time:Date.now()};
+ chatLines.push(item);if(chatLines.length>80)chatLines.shift();
+ if(S){S.chat=chatLines.slice(-60)}
+ renderChat();save();
+}
+function renderChat(){
+ let html=chatLines.slice(-45).map(m=>
+ `<div class="chatline">${m.system?'🔔': '💬'} <b>${escapeHTML(m.who)}:</b> ${escapeHTML(m.msg)}</div>`
+ ).join('');
+ $('chatMessages').innerHTML=html;
+ $('chatMessages').scrollTop=$('chatMessages').scrollHeight;
+ if(chatLines.length)$('chatPreview').textContent=chatLines[chatLines.length-1].who+': '+chatLines[chatLines.length-1].msg;
+}
+function loadChat(){
+ chatLines=(S.chat||[]).slice(-60);
+ if(!chatLines.length){
+  chatLines=[
+   {who:'Lina',msg:'Chào mọi người! Hôm nay là một ngày đẹp trời ở Aurora.'},
+   {who:'Borin',msg:'Tôi vừa tìm thấy mỏ đá mới ở phía Bắc!'},
+   {who:'Mira',msg:'Chợ trung tâm đang có nhiều hàng mới.'}
+  ];
+ }
+ renderChat();
+}
+function openChat(){$('chatModal').classList.remove('hidden');renderChat()}
+function closeChat(){$('chatModal').classList.add('hidden')}
+$('chatForm').addEventListener('submit',e=>{
+ e.preventDefault();let msg=$('chatInput').value.trim();if(!msg)return;
+ addChat(name,msg);$('chatInput').value='';
+});
+const npcChat=[
+ ['Lina','Ai muốn trao đổi quả mọng không?'],
+ ['Borin','Tôi đang thu thập đá ở chân núi.'],
+ ['Mira','Gian hàng của tôi vừa nhập thêm hàng mới!'],
+ ['Tomas','Có ai đang xây nhà ở phía Đông không?'],
+ ['Nora','Tôi thích khu chợ Aurora, đông vui quá!'],
+ ['Kiro','Tôi nghe nói có pha lê quý trong núi.'],
+ ['Ayla','Đế chế của bạn phát triển đến đâu rồi?'],
+ ['Finn','Ai cần mua gỗ thì ghé chợ nhé!'],
+ ['Rosa','Hôm nay có thêm người mới đến đảo.'],
+ ['Milo','Tôi đang tìm một nơi để xây nhà.'],
+ ['Sera','Nông trại phía Nam đang thu hoạch.'],
+ ['Darin','Chúng ta nên xây một lâu đài thật lớn!']
+];
+function npcTalk(){
+ if(!name||$('game').classList.contains('hidden'))return;
+ let m=npcChat[Math.floor(Math.random()*npcChat.length)];
+ addChat(m[0],m[1]);
+}
+setInterval(npcTalk,18000);
+
+canvas.addEventListener('pointerdown',e=>{
+ if(e.button!==0)return;
+ let r=canvas.getBoundingClientRect();
+ drag={sx:e.clientX-r.left,sy:e.clientY-r.top,cx:cam.x,cy:cam.y,moved:false};
+ canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener('pointermove',e=>{
+ if(!drag)return;
+ let r=canvas.getBoundingClientRect(),dx=e.clientX-r.left-drag.sx,dy=e.clientY-r.top-drag.sy;
+ if(Math.abs(dx)+Math.abs(dy)>5)drag.moved=true;
+ if(drag.moved){cam.x=drag.cx-dx/cam.scale;cam.y=drag.cy-dy/cam.scale;draw()}
+});
+canvas.addEventListener('pointerup',e=>{
+ if(!drag)return;
+ let r=canvas.getBoundingClientRect(),sx=e.clientX-r.left,sy=e.clientY-r.top;
+ if(!drag.moved){
+  let p=screenToWorld(sx,sy);p.x=Math.max(40,Math.min(WORLD.w-40,p.x));p.y=Math.max(40,Math.min(WORLD.h-40,p.y));
+  let stall=stalls.find(s=>Math.abs(s.x-p.x)<48&&Math.abs(s.y-p.y)<50);
+  if(stall){openShop(stall.id)}
+  else if(selectedBuild){let t=selectedBuild;selectedBuild=null;beginConstruction(t,p.x,p.y)}
+  else if(action){notify('Bạn đang thực hiện một hoạt động. Hãy đợi hoàn thành.')}
+  else{player.tx=p.x;player.ty=p.y;$('activity').textContent='Đang đi bộ'}
+ }
+ drag=null;
+});
+canvas.addEventListener('wheel',e=>{e.preventDefault();zoom(e.deltaY<0?1.1:.91)},{passive:false});
+
+function update(dt){
+ player.tx=Math.max(40,Math.min(WORLD.w-40,player.tx));player.ty=Math.max(40,Math.min(WORLD.h-40,player.ty));
+ let dx=player.tx-player.x,dy=player.ty-player.y,dist=Math.hypot(dx,dy);
+ if(dist>2){
+  let step=Math.min(dist,105*dt);player.x+=dx/dist*step;player.y+=dy/dist*step;
+  player.walk+=dt*7;player.dir=dx>=0?1:-1;
+ }else player.walk*=.8;
+
+ if(action){
+  if(action.phase==='walking'){
+   let d=Math.hypot(action.target.x-player.x,action.target.y-player.y);
+   if(d<8){
+    action.phase='working';action.elapsed=0;
+    $('activity').textContent=action.kind==='build'?'Đang thi công':action.kind==='birth'?'Đang sinh dân':'Đang khai thác';
+    $('status').textContent=action.kind==='build'?'Đang xây dựng':'Đang làm việc';
+    $('actionTitle').textContent=action.kind==='build'?'🏗️ Đang xây '+action.target.name:info[action.type]?.tool+' '+(info[action.type]?.name||'');
+   }
+  }else{
+   action.elapsed+=dt;
+   let pct=Math.min(100,action.elapsed/action.duration*100);
+   $('actionFill').style.width=pct+'%';
+   $('actionTime').textContent=Math.max(0,Math.ceil(action.duration-action.elapsed))+' giây còn lại';
+   if(action.kind==='build')action.target.progress=pct/100;
+   if(action.elapsed>=action.duration)finishAction();
+  }
+ }
+ for(let n of npcs){
+  if(Math.hypot(n.tx-n.x,n.ty-n.y)<5&&Math.random()<.018){
+   n.tx=Math.max(100,Math.min(3500,n.x+(Math.random()-.5)*180));
+   n.ty=Math.max(100,Math.min(2500,n.y+(Math.random()-.5)*180));
+  }
+  let vx=n.tx-n.x,vy=n.ty-n.y,d=Math.hypot(vx,vy);
+  if(d>2){let st=Math.min(d,n.speed*dt);n.x+=vx/d*st;n.y+=vy/d*st;n.walk+=dt*6;n.dir=vx>=0?1:-1}
+ }
+ if(Math.hypot(cam.x-player.x,cam.y-player.y)>280){
+  cam.x+=(player.x-cam.x)*dt*.3;cam.y+=(player.y-cam.y)*dt*.3;
+ }
+ cam.x=Math.max(0,Math.min(WORLD.w,cam.x));cam.y=Math.max(0,Math.min(WORLD.h,cam.y));
+}
+function loop(t){
+ let dt=Math.min(.04,(t-lastFrame)/1000||0);lastFrame=t;
+ if(!$('game').classList.contains('hidden')){update(dt);draw()}
+ requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+Object.assign(window,{logout,zoom,centerMap,gather,rest,placeBuilding,toggleQuick,buy,sell,openChat,closeChat,openShop,closeShop,startBirth,showView});
+setInterval(()=>{if(name){S.player={x:player.x,y:player.y};save()}},7000);
+window.addEventListener('beforeunload',()=>{if(name){S.player={x:player.x,y:player.y};save()}});
+</script>
+</body>
+</html>
